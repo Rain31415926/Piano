@@ -40,9 +40,16 @@ namespace _1121538_徐霈綺_簡易電子琴
         private void InitializePiano()
         {
             this.Text = "簡易電子琴";
-            this.Size = new Size(900, 300);
+            this.Size = new Size(880, 320);
             this.BackColor = Color.White;
             this.StartPosition = FormStartPosition.CenterScreen;
+
+            Button autoPlayBtn = new Button();
+            autoPlayBtn.Text = "自動演奏：小星星";
+            autoPlayBtn.Size = new Size(150, 40);
+            autoPlayBtn.Location = new Point(15, 230);
+            autoPlayBtn.Click += AutoPlayBtn_Click;
+            this.Controls.Add(autoPlayBtn);
 
             int whiteKeyWidth = 40;
             int whiteKeyHeight = 200;
@@ -138,6 +145,46 @@ namespace _1121538_徐霈綺_簡易電子琴
                 int msg = 0x080 | (note << 8) | (0 << 16); // Note Off 訊息 (停止)
                 midiOutShortMsg(midiOutHandle, msg);
             }
+        }
+
+        private async void AutoPlayBtn_Click(object sender, EventArgs e)
+        {
+            Button btn = sender as Button;
+            btn.Enabled = false;
+
+            int[] melody = {
+                60, 60, 67, 67, 69, 69, 67, // Do Do Sol Sol La La Sol
+                65, 65, 64, 64, 62, 62, 60, // Fa Fa Mi Mi Re Re Do
+                67, 67, 65, 65, 64, 64, 62, // Sol Sol Fa Fa Mi Mi Re
+                67, 67, 65, 65, 64, 64, 62, // Sol Sol Fa Fa Mi Mi Re
+                60, 60, 67, 67, 69, 69, 67, // Do Do Sol Sol La La Sol
+                65, 65, 64, 64, 62, 62, 60  // Fa Fa Mi Mi Re Re Do
+            };
+
+            int[] durations = {
+                500, 500, 500, 500, 500, 500, 1000,
+                500, 500, 500, 500, 500, 500, 1000,
+                500, 500, 500, 500, 500, 500, 1000,
+                500, 500, 500, 500, 500, 500, 1000,
+                500, 500, 500, 500, 500, 500, 1000,
+                500, 500, 500, 500, 500, 500, 1000
+            };
+
+            for (int i = 0; i < melody.Length; i++)
+            {
+                int note = melody[i];
+                int msgOn = 0x090 | (note << 8) | (127 << 16);
+                midiOutShortMsg(midiOutHandle, msgOn);
+
+                await Task.Delay(durations[i] - 50); // 扣掉些微時間做為音符間距
+
+                int msgOff = 0x080 | (note << 8) | (0 << 16);
+                midiOutShortMsg(midiOutHandle, msgOff);
+
+                await Task.Delay(50);
+            }
+
+            btn.Enabled = true;
         }
     }
 }
