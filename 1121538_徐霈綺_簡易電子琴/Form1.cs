@@ -58,7 +58,7 @@ namespace _1121538_徐霈綺_簡易電子琴
             int[] blackKeyOffsets = { 1, 3, 6, 8, 10 };
             int[] blackKeyIndices = { 0, 1, 3, 4, 5 }; // 黑鍵跟隨在哪個白鍵後面
 
-            int startNote = 60; // 從中央C (C4) 開始
+            int startNote = 48; // 從C3開始，讓中央C (C4) 落在中間的八度
             List<Button> blackKeys = new List<Button>();
 
             for (int oct = 0; oct < 3; oct++)
@@ -67,13 +67,24 @@ namespace _1121538_徐霈綺_簡易電子琴
                 for (int i = 0; i < 7; i++)
                 {
                     Button wBtn = new Button();
-                    wBtn.Text = whiteKeyNames[i];
+                    int note = startNote + oct * 12 + whiteKeyOffsets[i];
+
+                    if (note == 60) // 標示中央C (C4)
+                    {
+                        wBtn.Text = whiteKeyNames[i] + "\n(中央Do)";
+                        wBtn.BackColor = Color.LightYellow;
+                    }
+                    else
+                    {
+                        wBtn.Text = whiteKeyNames[i];
+                        wBtn.BackColor = Color.White;
+                    }
+
                     wBtn.TextAlign = ContentAlignment.BottomCenter;
                     wBtn.Padding = new Padding(0, 0, 0, 10);
                     wBtn.Size = new Size(whiteKeyWidth, whiteKeyHeight);
                     wBtn.Location = new Point(startX + (oct * 7 + i) * whiteKeyWidth, startY);
-                    wBtn.BackColor = Color.White;
-                    wBtn.Tag = startNote + oct * 12 + whiteKeyOffsets[i];
+                    wBtn.Tag = note;
                     wBtn.MouseDown += Btn_MouseDown;
                     wBtn.MouseUp += Btn_MouseUp;
                     wBtn.Font = new Font("Arial", 10);
