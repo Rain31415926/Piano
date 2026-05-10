@@ -23,6 +23,8 @@ namespace _1121538_徐霈綺_簡易電子琴
         private static extern int midiOutShortMsg(IntPtr handle, int message);
 
         private IntPtr midiOutHandle;
+        private Dictionary<int, Button> pianoKeys = new Dictionary<int, Button>();
+        private Dictionary<Button, Color> originalColors = new Dictionary<Button, Color>();
 
         public Form1()
         {
@@ -96,6 +98,9 @@ namespace _1121538_徐霈綺_簡易電子琴
                     wBtn.MouseUp += Btn_MouseUp;
                     wBtn.Font = new Font("Arial", 10);
                     this.Controls.Add(wBtn);
+
+                    pianoKeys[note] = wBtn;
+                    originalColors[wBtn] = wBtn.BackColor;
                 }
 
                 // 建立黑鍵
@@ -115,6 +120,10 @@ namespace _1121538_徐霈綺_簡易電子琴
                     bBtn.Font = new Font("Microsoft JhengHei", 7);
                     blackKeys.Add(bBtn);
                     this.Controls.Add(bBtn);
+
+                    int bNote = (int)bBtn.Tag;
+                    pianoKeys[bNote] = bBtn;
+                    originalColors[bBtn] = bBtn.BackColor;
                 }
             }
 
@@ -176,10 +185,21 @@ namespace _1121538_徐霈綺_簡易電子琴
                 int msgOn = 0x090 | (note << 8) | (127 << 16);
                 midiOutShortMsg(midiOutHandle, msgOn);
 
+                Button keyBtn = null;
+                if (pianoKeys.TryGetValue(note, out keyBtn))
+                {
+                    keyBtn.BackColor = originalColors[keyBtn] == Color.Black ? Color.DimGray : Color.Gray;
+                }
+
                 await Task.Delay(durations[i] - 50); // 扣掉些微時間做為音符間距
 
                 int msgOff = 0x080 | (note << 8) | (0 << 16);
                 midiOutShortMsg(midiOutHandle, msgOff);
+
+                if (keyBtn != null)
+                {
+                    keyBtn.BackColor = originalColors[keyBtn]; // 恢復原色
+                }
 
                 await Task.Delay(50);
             }
